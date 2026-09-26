@@ -1,4 +1,4 @@
-'# Eattiligent Nutrition App 
+# Eattiligent Nutrition App 
 
 Eattiligent is a comprehensive, full-stack nutrition and meal-management platform designed to bridge the gap between individual health profiles and daily dietary execution[cite: 1]. By synthesizing user-specific data—including food allergies, strict dietary restrictions, and chronic health conditions—the application dynamically curates safe, compliant meal options and actionable nutritional insights[cite: 1].
 
