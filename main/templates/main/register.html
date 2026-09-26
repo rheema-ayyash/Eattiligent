@@ -1,0 +1,110 @@
+{% extends 'main/base.html' %}
+{% block title %}Register{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow">
+            <div class="card-body p-5">
+                <h2 class="text-center mb-4">Register</h2>
+                
+                {% if errors %}
+                <div class="alert alert-danger" role="alert">
+                    <ul class="mb-0">
+                    {% for field, error in errors.items %}
+                        <li><strong>{{ field|title }}:</strong> {{ error }}</li>
+                    {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+                
+                <form method="POST" action="{% url 'registration_page' %}">
+                    {% csrf_token %}
+                    
+                    {% if errors.registration %}
+                        <p style="color: red; text-align: center;">{{ errors.registration }}</p>
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" value="{{ email }}" required>
+                        {% if errors.email %}<small style="color: red;">{{ errors.email }}</small>{% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                        {% if errors.password %}<small style="color: red;">{{ errors.password }}</small>{% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="confirm_pass" class="form-label">Confirm Password</label>
+                        <input type="password" class="form-control" id="confirm_pass" name="confirm_pass" required>
+                        {% if errors.confirm_pass %}<small style="color: red;">{{ errors.confirm_pass }}</small>{% endif %}
+                    </div>
+
+                    <hr>
+
+                    <div class="mb-3">
+                        <label for="weight" class="form-label">Current Weight</label>
+                        <div class="input-group">
+                            <input type="number" step="0.1" class="form-control" id="weight" name="weight" value="{{ weight }}">
+                            <select class="form-select" name="weight_unit" style="max-width: 80px;">
+                                <option value="kg" {% if weight_unit == 'kg' %}selected{% endif %}>kg</option>
+                                <option value="lbs" {% if weight_unit == 'lbs'%}selected{% endif %}>lbs</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="goal_weight" class="form-label">Goal Weight</label>
+                        <input type="number" step="0.1" class="form-control" id="goal_weight" name="goal_weight" value="{{ goal_weight }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="bmr" class="form-label">BMR Est.</label>
+                        <input type="number" class="form-control" id="bmr" name="bmr">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="disease" class="form-label">Disease / Condition</label>
+                        <select class="form-select" id="disease" name="disease">
+                            <option value="">None Given</option>
+                            {% for d in diseases %}
+                                <option value="{{ d.id }}">{{ d.title}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="dietary_restriction" class="form-label">Dietary Restrictions</label>
+                        <input type="text" class="form-control" id="dietary_restriction" name="dietary_restriction">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="allergy" class="form-label">Allergies</label>
+                        <input type="text" class="form-control" id="allergy" name="allergy">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="meals_per" class="form-label">Meals Per Day</label>
+                        <input type="number" class="form-control" id="meals_per" name="meals_per">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="snacks_per" class="form-label">Snacks Per Day</label>
+                        <input type="number" class="form-control" id="snacks_per" name="snacks_per">
+                    </div>
+                    
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">Register</button>
+                    </div>
+                </form>
+                
+                <div class="text-center mt-3">
+                    <p>Already have an account? <a href="{% url 'login_page' %}">Login here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Selected Diseases{% endblock %}
+
+{% block content %}
+
+
+<h1>Selected Diseases:</h1>
+
+{% if disease %}
+<div class="list-group">
+
+    {% for d in disease %}
+        <a href="{% url 'disease_detail' d.id %}" class="list-group-item list-group-item-action">
+            {{ d.title }}
+        </a>
+    {% endfor %}
+
+</div>
+{% else %}
+    <p>You haven't selected any disease.</p>
+{% endif %}
+<br>
+<a href="{% url 'disease_page' %}" class="btn btn-success">Back to disease Selection Page</a>
+<a href="{% url 'recipes_list' %}" class="btn btn-success">Generate Recipe List for Given Disease</a>
+
+
+{% endblock %}

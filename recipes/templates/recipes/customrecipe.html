@@ -1,0 +1,156 @@
+{% extends 'main/base.html' %}
+
+
+{% block title %}Custom Recipe{% endblock %}
+
+
+
+{% block content %}
+
+{% block style %}
+    <style>
+        button{
+            padding-right: 50px;
+        }
+
+        .addBtn, .removeBtn{
+            font-size: larger;
+        }
+
+        textarea{
+            height: 200px;
+            width: 400px;
+            overflow-y: auto;
+        }
+        
+        .errors{
+            color: red;
+        }
+
+    </style>
+{% endblock %}
+
+<h1>New Recipe:</h1>
+
+<form method="post">
+    {% csrf_token %}
+
+    
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h4>Meal Name:</h4>
+                    <input type="text" name="title" id="title">
+                    {% if errors.title %}
+                    <div class="errors">
+                    {{ errors.title }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="my-3" id="typeChk">
+                <h4>Meal Type:</h4>
+                <label for="snack">Snack</label>
+                <input type="checkbox" name="type" id="snack" value="Snack">
+                <label for="breakfast">Breakfast</label>
+                <input type="checkbox" name="type" id="breakfast" value="Breakfast">
+                <label for="lunch">Lunch</label>
+                <input type="checkbox" name="type" id="lunch" value="Lunch">
+                <label for="dinner">Dinner</label>
+                <input type="checkbox" name="type" id="dinner" value="Dinner">
+            </div>
+            {% if errors.type %}
+            <div class="errors">
+            {{ errors.type }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+            
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="my-3" id="ingredient-container">
+                <h4>Ingredients:</h4>
+                <div id="ingredient-selections" class="my-3">
+                    <label for="ingredient-selection">Ingredient:</label>
+                    <input list="ingredients" name="ingredient-selection">
+                    <datalist name="ingredient-selection" id="ingredients">
+                        {% for i in ingredients %}
+                            <option value="{{ i.title }}">{{ i.title }}({{ i.measurements }})</option>
+                        {% endfor %}
+                    </datalist>
+                    <label for="ingredient-amount">Amount:</label>
+                    <input type="text" name="ingredient-amount">
+                </div>
+                {% if errors.ingredients %}
+                <div class="errors">{{ errors.ingredients }}</div>
+                {% endif %}
+                {% if errors.amounts %}
+                <div class="errors">{{ errors.amounts }}</div>
+                {% endif %}
+            </div>
+
+            <div class="my-3">
+                <button id="addBtn" class="btn btn-outline-primary" type="button">Add Ingredient</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="my-3" id="instructions">
+                <h4>Cooking Instructions</h4>
+                <h6>Instructions to cook your delicious meal:</h6>
+                <p>(Must be input in steps using step number to deliniate ex: 1.Step1 2. Step2 etc.)</p>
+                <textarea name="instructions" id="instructions" ></textarea>
+            </div>
+            {% if errors.instructions %}
+            <div class="errors">{{ errors.instructions }}</div>
+            {% endif %}
+
+        </div>
+    </div>
+
+    <button type="submit" formaction="{% url 'recipes_list' %}" formmethod="get" id="cancel" class="btn btn-success mr-3 my-3">Back to recipe selection</button>
+    <button type="submit" id="save" class="btn btn-primary mx-3 my-3">Save Recipe</button>
+</form>
+
+
+
+<script>
+    document.getElementById("addBtn").onclick = () => {
+        let div1 = document.getElementById("ingredient-selections");
+        let newDiv = div1.cloneNode(true);
+
+        newDiv.removeAttribute("id");
+        
+        newDiv.querySelectorAll("input, textarea, select").forEach(e => {
+        e.value = "";
+        });
+
+        let removeBtn = document.createElement("button");
+        removeBtn.textContent = "X";
+        removeBtn.className = "btn btn-outline-danger";
+        removeBtn.id = "removeBtn";
+
+        removeBtn.onclick = () => {
+            newDiv.remove();
+        }
+
+
+
+        newDiv.appendChild(removeBtn);
+        document.getElementById("ingredient-container").appendChild(newDiv);
+    }
+    
+</script>
+
+
+
+
+
+{% endblock %}

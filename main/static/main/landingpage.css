@@ -1,0 +1,58 @@
+body{
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.header{
+    justify-content:space-between;
+    display: flex;
+    align-items: center;
+}
+
+.left1{
+    margin-right: 8px;
+    font-weight: bold;
+}
+
+.left2{
+    margin-right: auto;
+}
+
+.right{
+    text-align: right;
+}
+
+
+.register-btn {
+    position: fixed;      /* Float above page content */
+    bottom: 20px;         /* 20px from bottom */
+    right: 20px;          /* 20px from right */
+    background-color: #0072CE; /* DePaul blue */
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    transition: background-color 0.2s;
+}
+
+.register-btn:hover {
+    background-color: #0055a5;
+}
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+.full-img{
+    position: fixed; /* prevents scrolling */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 95vh;
+    object-fit: contain; /* fills screen and is centered*/
+    z-index: -1; /* puts image behind everything */
+  
+
+}

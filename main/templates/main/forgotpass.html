@@ -1,0 +1,44 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Forgot Password{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow">
+            <div class="card-body p-5">
+                <h2 class="text-center mb-4">Forgot Password</h2>
+
+                    <form method = "POST">
+                        {% csrf_token %}
+                        <p> Enter your email to reset your password.</p>
+                        <label for="email" class="form-label"> Email </label>
+                        <input type = "email" name="email">
+                        {% if errors.email %}
+                            <div class="invalid-feedback" > {{errors.email}} </div>
+                        {% endif %}
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">Send Reset Link</button>
+                        </div>
+                    </form>
+    
+                    <div id="sent_email" class="popup" hidden>
+                        <div class = "m_content">
+                            <p id=>An email about your forgotten password has been sent</p>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    {% if sent %}
+        <script>
+            const sent_email=document.getElementById('sent_email');
+            if (sent_email){
+                sent_email.hidden = false;
+            }
+        </script>
+    {% endif %}
+{% endblock %}

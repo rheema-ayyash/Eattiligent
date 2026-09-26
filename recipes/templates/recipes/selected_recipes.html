@@ -1,0 +1,107 @@
+{% extends 'main/base.html' %}
+
+{% block extra_css %}
+
+<style>
+.card-body label{
+    color: #b06a24;
+}
+
+
+</style>
+{% endblock %}
+
+{% block title %}Selected Recipes{% endblock %}
+
+{% block content %}
+
+
+<h1>Selected Recipes:</h1>
+
+
+<div>
+    <div class="d-flex flex-row-reverse gap-2 mb-3">
+        <a href="{% url 'grocery_list' %}" class="btn btn-success">Generate Grocery List</a>
+        <a href="{% url 'recipes_list' %}" class="btn btn-success">Back to recipe selection</a>
+    </div>
+
+    <div id="table-container">
+        {% if recipes_with_nutrition %}
+        <div class="row">
+                {% for recipe, nutrition in recipes_with_nutrition %}
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ recipe.title }}</h5>
+                            <p class="card-text">
+                                <label>Meal Type:</label> {{ recipe.meal_type|default:"Snack" }}<br>
+                                <label>Calories:</label> {{ nutrition.calories }} kcal<br>
+                                <label>Protein:</label> {{ nutrition.protein }} g <br>
+                                <label>Carbs:</label> {{ nutrition.carbs }} g<br>
+                                <label>Fiber:</label> {{ nutrition.fiber|default:"—" }}<br>
+                                <label>Fats:</label> {{ nutrition.fats|default:"—" }}<br>
+                            </p>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-success mt-auto w-50" onclick="removeFromUserPickedRecipes('{{ recipe.title|escapejs }}')">Remove</button>
+                                <a href="{% url 'recipe_info' recipe.id %}" class="btn btn-success mt-auto w-50">More Info</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p>You haven't picked any recipes.</p>
+            {% endif %}
+        </div>
+    </div>
+
+
+<script>
+
+    function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+    function removeFromUserPickedRecipes(recipeTitle) {
+            const csrftoken = getCookie('csrftoken');
+            
+            // Send POST request to Django backend
+            fetch('/remove_recipes/', {
+                method: 'POST',  // POST because we're modifying data
+                headers: {
+                    'Content-Type': 'application/json',  // We're sending JSON
+                    'X-CSRFToken': csrftoken  // Django security token
+                },
+                body: JSON.stringify({ recipe_title: recipeTitle })  // Convert to JSON string
+            })
+            .then(response => response.json())  // Parse response JSON
+            .then(data => {
+                // Show user-friendly message based on success/error
+                if (data.success) {
+                    alert('Recipe has been removed from your selected recipes!');
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                // Handle network errors
+                console.error('Error:', error);
+                alert('An unexpected error occurred.');
+            });
+        }
+</script>
+
+{% endblock %}

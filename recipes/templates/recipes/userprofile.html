@@ -1,0 +1,234 @@
+{% extends 'main/base.html' %}
+
+{% block title %}User Profile - Eatillegent{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-10 col-lg-8">
+
+        <!-- Profile Header -->
+        <div class="card mb-4">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center">
+                    <div class="profile-avatar me-3">
+                        <div style="width: 80px; height: 80px; background-color: #28a745; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: white;">
+                            {{ user.email|first|upper }}
+                        </div>
+                    </div>
+                    <div>
+                        <h2 class="mb-1">{{ user.email }}</h2>
+                        <p class="text-muted mb-0">Eatillegent Member</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Navigation -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Dashboard</h5>
+                <div class="row">
+                    <div class="col-md-4 mb-2">
+                        <a href="/recipes/" class="btn btn-outline-success w-100">Browse Recipes</a>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <a href="#" class="btn btn-outline-success w-100">Meal Plan</a>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <a href="#" class="btn btn-outline-success w-100">Saved Recipes</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Information -->
+        <div class="card">
+            <div class="card-body p-4">
+                <h5 class="card-title mb-4">Profile Information</h5>
+
+                <form id="profileForm" method="POST">
+                    {% csrf_token %}
+
+                    <!-- Email (Read-only) -->
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" class="form-control" id="email" value="{{ user.email }}" readonly>
+                    </div>
+
+                    <!-- Weight -->
+                    <div class="mb-3">
+                        <label for="weight" class="form-label">Weight (kg)</label>
+                        <input type="number" class="form-control" id="weight" name="weight" value="{{ app_user.weight|default:'' }}" placeholder="Enter your weight">
+                    </div>
+
+                    <!-- Height -->
+                    <div class="mb-3">
+                        <label for="height" class="form-label">Height (cm)</label>
+                        <input type="number" class="form-control" id="height" name="height" value="{{ app_user.height|default:'' }}" placeholder="Enter your height">
+                    </div>
+
+                    <!-- Age -->
+                    <div class="mb-3">
+                        <label for="age" class="form-label">Age</label>
+                        <input type="number" class="form-control" id="age" name="age" value="{{ app_user.age|default:'' }}" placeholder="Enter your age">
+                    </div>
+
+                    <!-- Gender -->
+                    <div class="mb-3">
+                        <label for="gender" class="form-label">Gender</label>
+                        <select class="form-select" id="gender" name="gender">
+                            <option value="">Select gender</option>
+                            <option value="male" {% if app_user.profile.gender == 'male' %}selected{% endif %}>Male</option>
+                            <option value="female" {% if app_user.profile.gender == 'female' %}selected{% endif %}>Female</option>
+                            <option value="other" {% if app_user.profile.gender == 'other' %}selected{% endif %}>Other</option>
+                        </select>
+                    </div>
+
+                    <!-- Disease Selection -->
+                    <div class="mb-3">
+                        <label for="disease" class="form-label">Health Condition</label>
+                        <select class="form-select" id="disease" name="disease" >
+                            <option value="" selected disabled>Select condition</option>
+                            {% for d in all_diseases %}
+                                <option value="{{ d.title }}">
+                                    {{d.title}}
+                                </option>
+                            {% endfor %}
+                            <!-- <option value="diabetes" {% if user.profile.disease == 'diabetes' %}selected{% endif %}>Diabetes</option>
+                            <option value="hypertension" {% if user.profile.disease == 'hypertension' %}selected{% endif %}>Hypertension</option>
+                            <option value="heart_disease" {% if user.profile.disease == 'heart_disease' %}selected{% endif %}>Heart Disease</option>
+                            <option value="celiac" {% if user.profile.disease == 'celiac' %}selected{% endif %}>Celiac Disease</option>
+                            <option value="none" {% if user.profile.disease == 'none' %}selected{% endif %}>None</option>-->
+                        </select> 
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label"> Active Disease Filters For Recipes:</label>
+                        <div class="d-flex flex-wrap gap-2"> 
+                            {% if picked_diseases %}
+                                {% for disease in picked_diseases %}
+                                    <span class="badge bg-success p-2">
+                                        <i class="fas fa-check-circle me-1">
+                                        </i>
+                                        {{ disease }}
+                                        <input type="hidden" name="active_diseases" value="{{ disease }}">
+                                        <button type="button" class="btn-close btn-close-white ms-2"
+                                                style="font-size: 0.5rem;" onclick="this.parentElement.remove();">
+                                        </button>
+                                    </span>
+                                {% endfor %}
+                            {% else %}
+                                <span class="text-muted d-block"> No Active Conditions Listed</span>
+                            {% endif %}
+                        </div>
+
+                    </div>
+
+                    <!-- Dietary Restrictions -->
+                    <div class="mb-3">
+                        <label class="form-label">Dietary Restrictions</label>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="dietary_restrictions" value="vegetarian" id="vegetarian">
+                                    <label class="form-check-label" for="vegetarian">Vegetarian</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="dietary_restrictions" value="vegan" id="vegan">
+                                    <label class="form-check-label" for="vegan">Vegan</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="dietary_restrictions" value="gluten-free" id="gluten-free">
+                                    <label class="form-check-label" for="gluten-free">Gluten-Free</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="dietary_restrictions" value="dairy-free" id="dairy-free">
+                                    <label class="form-check-label" for="dairy-free">Dairy-Free</label>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="dietary_restrictions" value="nut-allergy" id="nut-allergy">
+                                    <label class="form-check-label" for="nut-allergy">Nut Allergy</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="dietary_restrictions" value="shellfish" id="shellfish">
+                                    <label class="form-check-label" for="shellfish">Shellfish Allergy</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="dietary_restrictions" value="soy" id="soy">
+                                    <label class="form-check-label" for="soy">Soy Allergy</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="dietary_restrictions" value="egg" id="egg">
+                                    <label class="form-check-label" for="egg">Egg Allergy</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Activity Level -->
+                    <div class="mb-3">
+                        <label for="activity_level" class="form-label">Activity Level</label>
+                        <select class="form-select" id="activity_level" name="activity_level">
+                            <option value="">Select activity level</option>
+                            <option value="sedentary" {% if user.profile.activity_level == 'sedentary' %}selected{% endif %}>Sedentary</option>
+                            <option value="light" {% if user.profile.activity_level == 'light' %}selected{% endif %}>Light Activity</option>
+                            <option value="moderate" {% if user.profile.activity_level == 'moderate' %}selected{% endif %}>Moderate Activity</option>
+                            <option value="very_active" {% if user.profile.activity_level == 'very_active' %}selected{% endif %}>Very Active</option>
+                            <option value="extra_active" {% if user.profile.activity_level == 'extra_active' %}selected{% endif %}>Extra Active</option>
+                        </select>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#saveModal">Save Changes</button>
+                        <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#cancelModal">Cancel</button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Save Confirmation Modal -->
+<div class="modal fade" id="saveModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirm Changes</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to save these changes to your profile?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Go Back</button>
+                <button type="button" class="btn btn-success" onclick="document.getElementById('profileForm').submit()">Yes, Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cancel Confirmation Modal -->
+<div class="modal fade" id="cancelModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cancel Changes</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to cancel? All unsaved changes will be lost.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Go Back</button>
+                <button type="button" class="btn btn-danger" onclick="location.reload()">Yes, Cancel Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

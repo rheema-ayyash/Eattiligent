@@ -1,0 +1,23 @@
+{% load static %}
+<html lang ="en-US">
+    <head>
+        <meta charset="utf-8" />
+        <meta name = "viewport" content = "width=device-width" />
+        <link rel="stylesheet" href="{% static 'main/landingpage.css' %}">
+    </head>
+    <body>
+            <div class = "right">
+                {% if request.user.is_authenticated %}
+                    {{request.user.email}}
+                {% else %}
+                    <a href = "{% url 'login_page' %}">Login</a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class = "image">
+            <img src="{% static 'main/images/NutritionAppLogo.png' %}" class="full-img">
+    
+        </div>
+    </body>
+</html>

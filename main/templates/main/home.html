@@ -1,0 +1,85 @@
+{% extends 'main/base.html' %}
+{% load static %}
+{% block extra_css %}
+<style>
+.homeA {
+    background-color: #2E7D32;
+    border-color: #2E7D32;
+}
+
+.homeB {
+    background-color: #1B9E77;
+    border-color: #1B9E77;
+}
+
+.homeC {
+    background-color: #F57C00;
+    border-color: #F57C00;
+}
+.homeD {
+    background-color: #b79900;
+    border-color: #b79900;
+}
+</style>
+{% endblock %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="text-center">
+    <h1 class="display-4 mb-4">Welcome to Eatillgent</h1>
+    <p class="lead mb-5">Track your nutrition and discover healthy recipes</p>
+        <div class="text-center mb-4">
+        <img src="{% static 'main/images/NutritionAppLogo.png' %}" 
+            alt="Eatillegent Logo"
+            style="width:150px; height: 150px;;">
+        </div>
+    {% if user.is_authenticated %}
+        <div class="row mt-5">
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3>Daily Digest</h3>
+                        <p>Log and view your nutrition for the day</p>
+                        <a href="{% url 'daily_digest' %}" class="btn btn-success homeA">Daily Digest</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3>Weekly Digest</h3>
+                        <p>Get a recap of your weekly eats.</p>
+                        <a href="{% url 'weekly_digest' %}" class="btn btn-success homeB">Weekly Digest</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3>Recipes</h3>
+                        <p>Explore and save your favorite recipes</p>
+                        <a href="{% url 'recipes_list' %}" class="btn btn-success homeC">View Recipes</a>
+                    </div>
+                </div>
+            </div>           
+            <div class="col-md-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h3>Diseases</h3>
+                        <p>View and manage disease information</p>
+                        <a href="{% url 'disease_page' %}" class="btn btn-success homeD">View Diseases</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+      
+        
+    {% else %}
+        <div class="mt-4">
+            <a href="{% url 'login_page' %}" class="btn btn-primary btn-lg mx-2">Login</a>
+            <a href="{% url 'registration_page' %}" class="btn btn-success btn-lg mx-2">Register</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

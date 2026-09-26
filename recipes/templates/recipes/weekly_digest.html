@@ -1,0 +1,94 @@
+<!doctype html>
+{% extends 'main/base.html' %}
+
+{% block title %}Weekly Digest{% endblock %}
+
+{% block content %}
+<div>
+    <h1>Weekly Digest</h1>
+    <p>Let's take a look into this week!</p>
+
+    <hr>
+
+    <h2>Most Used Ingredient</h2>
+    {% if most_common_ingredient %}
+        <p>{{ most_common_ingredient }}</p>
+    {% else %}
+        <p>No data available.</p>
+    {% endif %}
+
+    <hr>
+
+    <h2>Lowest Calorie Recipe</h2>
+    {% if lowest_cal_recipe %}
+        <p>{{ lowest_cal_recipe.title }} — {{ lowest_cal }} kcal</p>
+    {% else %}
+        <p>No data available.</p>
+    {% endif %}
+
+    <hr>
+
+    <h2>Highest Calorie Recipe</h2>
+    {% if highest_cal_recipe %}
+        <p>{{ highest_cal_recipe.title }} — {{ highest_cal }} kcal</p>
+    {% else %}
+        <p>No data available.</p>
+    {% endif %}
+
+    <hr>
+
+    <h2>Try Something New This Week</h2>
+    {% if not_Chosen %}
+        <p>{{ not_Chosen.title }}</p>
+        <p>{{ not_Chosen.meal_type|default:"No meal type listed" }}</p>
+        <p>{{ not_Chosen.dietary_restrictions|default:"No dietary info listed" }}</p>
+    {% else %}
+        <p>No suggestions available.</p>
+    {% endif %}
+
+    <hr>
+    <canvas id="CalorieChart" style="width:100%;max-width:700px"></canvas>
+    <canvas id="WorkoutsChart" style="width:100%;max-width:700px"></canvas>
+
+
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
+<script >
+const results = {{ results_json|safe }};
+const workouts = {{ workouts_json|safe }};
+
+
+const barColors = ["red", "green","blue","orange","brown", "purple", "cyan"];
+
+const labels = results.map(d => d.date);
+const calories = results.map(d => d.total_calories);
+const dates = Object.keys(workouts);
+const workout_counts = Object.values(workouts);
+
+new Chart("CalorieChart", {
+  type: "bar",
+  data: {
+    labels: labels,
+    datasets: [{
+        label: 'Net Calories',
+      backgroundColor: barColors,
+      data: calories
+    }]
+  },
+  options: {}
+});
+new Chart("WorkoutsChart", {
+  type: "bar",
+  data: {
+    labels: labels,
+    datasets: [{
+        label: 'Workout Counts',
+      backgroundColor: barColors,
+      data: workout_counts
+    }]
+  },
+  options: {}
+});
+</script>
+{% endblock %}

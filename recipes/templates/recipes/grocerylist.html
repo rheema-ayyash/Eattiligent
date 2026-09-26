@@ -1,0 +1,42 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Grocery List{% endblock %}
+
+{% block content %}
+
+{% block style %}
+    <style>
+        th, td {
+            padding-right: 15em;
+        }
+    </style>
+{% endblock %}
+
+<h1>Grocery List:</h1>
+
+{% if ingredients %}
+    <div id="table-container">
+        <table id="ingredientsTable">
+            <thead>
+                <tr>
+                    <th>Ingredient</th>
+                    <th>Amount Needed</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for current_ingredient, amount in ingredients.items %}
+                    <tr>
+                        <td id="ingredient-name">{{ current_ingredient.title }}</td>
+                        <td id="recipe-amount">{{ amount|floatformat:1 }} {{ current_ingredient.measurements}}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table> </div>
+{% else %}
+    <p>You haven't picked any recipes.</p>
+{% endif %}
+
+<br>
+<a href="{% url 'recipes_list' %}" class="btn btn-success">Back to recipe selection</a>
+
+{% endblock %}

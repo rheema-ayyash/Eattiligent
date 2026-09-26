@@ -1,0 +1,441 @@
+{% extends 'main/base.html' %}
+
+{% block title %}Daily Digest - Eatillegent{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-10 col-lg-9">
+
+        <!-- Profile Header (R1) -->
+        <div class="card mb-4">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center">
+                        <div style="width: 60px; height: 60px; background-color: #28a745; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white; margin-right: 15px;">
+                            {{ user.email|first|upper }}
+                        </div>
+                        <div>
+                            <h4 class="mb-0">{{ user.email }}</h4>
+                            <p class="text-muted mb-0 small">Daily Nutrition Tracker</p>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <p class="mb-0 small text-muted">Today's Date</p>
+                        <p class="mb-0 fw-bold" id="currentDate"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Navigation (R2) -->
+        <div class="card mb-4">
+            <div class="card-body p-3">
+                <div class="row g-2">
+                    <div class="col-6 col-md-3">
+                        <a href="/home/" class="btn btn-outline-success w-100 btn-sm">Home</a>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <a href="/recipes/" class="btn btn-outline-success w-100 btn-sm">Recipes</a>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <a href="/diseases/" class="btn btn-outline-success w-100 btn-sm">Diseases</a>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <a href="/userprofile/" class="btn btn-outline-success w-100 btn-sm">Profile</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calorie Summary Cards (R4, R5) -->
+        <div class="row mb-4">
+            <div class="col-md-4 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h6 class="text-muted mb-2">Consumed</h6>
+                        <h2 class="mb-0 text-success" id="consumedCalories">0</h2>
+                        <small class="text-muted">kcal</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h6 class="text-muted mb-2">Goal</h6>
+                        <h2 class="mb-0" id="goalCalories">2000</h2>
+                        <small class="text-muted">kcal</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h6 class="text-muted mb-2">Remaining</h6>
+                        <h2 class="mb-0 text-primary" id="remainingCalories">2000</h2>
+                        <small class="text-muted">kcal</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h6 class="mb-3">Daily Progress</h6>
+                <div class="progress" style="height: 30px;">
+                    <div class="progress-bar bg-success" id="progressBar" role="progressbar" style="width: 0%">
+                        <span id="progressText">0%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Food/Calories Section (R3) -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Add Food Intake</h5>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="calories" class="form-label">Calories (kcal)</label>
+                        <input type="number" class="form-control" id="calories" placeholder="Enter calories">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="mealName" class="form-label">Meal Name (optional)</label>
+                        <input type="text" class="form-control" id="mealName" placeholder="e.g., Breakfast">
+                    </div>
+                </div>
+
+                <h6 class="mb-3">Macronutrients</h6>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label for="protein" class="form-label">Protein (g)</label>
+                        <input type="number" class="form-control" id="protein" placeholder="Enter protein">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="carbs" class="form-label">Carbs (g)</label>
+                        <input type="number" class="form-control" id="carbs" placeholder="Enter carbs">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label for="fats" class="form-label">Fats (g)</label>
+                        <input type="number" class="form-control" id="fats" placeholder="Enter fats">
+                    </div>
+                </div>
+
+                <button class="btn btn-success" onclick="addFood()">Add to Daily Log</button>
+            </div>
+        </div>
+
+        <!-- Macros Summary (R4) -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Macronutrient Breakdown</h5>
+                <div class="row text-center">
+                    <div class="col-4">
+                        <h6 class="text-muted">Protein</h6>
+                        <h4 class="text-success" id="totalProtein">0g</h4>
+                    </div>
+                    <div class="col-4">
+                        <h6 class="text-muted">Carbs</h6>
+                        <h4 class="text-primary" id="totalCarbs">0g</h4>
+                    </div>
+                    <div class="col-4">
+                        <h6 class="text-muted">Fats</h6>
+                        <h4 class="text-warning" id="totalFats">0g</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Workout Section (R7, R8) -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Workout & Exercise</h5>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="workoutType" class="form-label">Workout Type</label>
+                        <select class="form-select" id="workoutType">
+                            <option value="">Select workout</option>
+                            <option value="cardio">Cardio</option>
+                            <option value="strength">Strength Training</option>
+                            <option value="yoga">Yoga</option>
+                            <option value="sports">Sports</option>
+                            <option value="walking">Walking</option>
+                            <option value="running">Running</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="burnedCalories" class="form-label">Calories Burned (kcal)</label>
+                        <input type="number" class="form-control" id="burnedCalories" placeholder="Enter calories burned">
+                    </div>
+                </div>
+
+                <button class="btn btn-success" onclick="addWorkout()">Add Workout</button>
+                
+                <div class="mt-3">
+                    <h6>Total Burned Today: <span class="text-success" id="totalBurned">0 kcal</span></h6>
+                </div>
+            </div>
+        </div>
+
+        <!-- Food Log (R9) -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Today's Food Log</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Meal</th>
+                                <th>Calories</th>
+                                <th>Protein</th>
+                                <th>Carbs</th>
+                                <th>Fats</th>
+                                <th>Time</th>
+                            </tr>
+                        </thead>
+                        <tbody id="foodLogTable">
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    
+    </div>
+</div>
+
+<!-- Out of Range Warning Modal (R6) -->
+<div class="modal fade" id="warningModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title">⚠️ Nutrition Alert</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="warningMessage"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Display current date
+document.getElementById('currentDate').textContent = new Date().toLocaleDateString('en-US', { 
+    month: 'short', 
+    day: 'numeric', 
+    year: 'numeric' 
+});
+
+// CSRF token helper
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Load today's data from database
+async function loadTodayData() {
+    try {
+        const response = await fetch('/api/daily/data/');
+        const data = await response.json();
+        
+        if (data.success) {
+            // Update displays
+            document.getElementById('consumedCalories').textContent = Math.round(data.net_calories);
+            document.getElementById('goalCalories').textContent = Math.round(data.calorie_goal);
+            document.getElementById('remainingCalories').textContent = Math.round(data.remaining_calories);
+            document.getElementById('totalProtein').textContent = Math.round(data.total_protein) + 'g';
+            document.getElementById('totalCarbs').textContent = Math.round(data.total_carbs) + 'g';
+            document.getElementById('totalFats').textContent = Math.round(data.total_fats) + 'g';
+            document.getElementById('totalBurned').textContent = Math.round(data.total_burned) + ' kcal';
+            
+            // Update progress bar
+            const progress = Math.min((data.net_calories / data.calorie_goal) * 100, 100);
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('progressText').textContent = Math.round(progress) + '%';
+            
+            // Update progress bar color
+            const progressBar = document.getElementById('progressBar');
+            if (progress > 100) {
+                progressBar.className = 'progress-bar bg-danger';
+            } else if (progress > 90) {
+                progressBar.className = 'progress-bar bg-warning';
+            } else {
+                progressBar.className = 'progress-bar bg-success';
+            }
+            
+            // Load meals table
+            loadMealsTable(data.meals);
+        }
+    } catch (error) {
+        console.error('Error loading data:', error);
+    }
+}
+
+// Load meals into table
+function loadMealsTable(meals) {
+    const tableBody = document.getElementById('foodLogTable');
+    
+    if (!meals || meals.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No meals logged yet</td></tr>';
+        return;
+    }
+    
+    tableBody.innerHTML = meals.map(meal => {
+        const time = new Date(meal.logged_at).toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit' 
+        });
+        return `
+            <tr>
+                <td>${meal.meal_name}</td>
+                <td>${Math.round(meal.calories)} kcal</td>
+                <td>${Math.round(meal.protein)}g</td>
+                <td>${Math.round(meal.carbs)}g</td>
+                <td>${Math.round(meal.fats)}g</td>
+                <td>${time}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// Add food to database
+async function addFood() {
+    const calories = parseFloat(document.getElementById('calories').value) || 0;
+    const protein = parseFloat(document.getElementById('protein').value) || 0;
+    const carbs = parseFloat(document.getElementById('carbs').value) || 0;
+    const fats = parseFloat(document.getElementById('fats').value) || 0;
+    const mealName = document.getElementById('mealName').value || 'Meal';
+
+    if (calories === 0) {
+        alert('Please enter calories');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/daily/add-meal/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                meal_name: mealName,
+                calories: calories,
+                protein: protein,
+                carbs: carbs,
+                fats: fats
+            })
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+            // Reload all data
+            await loadTodayData();
+            
+            // Check nutrition range
+            checkNutritionRange(data.net_calories, data.total_protein);
+            
+            // Clear form
+            document.getElementById('calories').value = '';
+            document.getElementById('protein').value = '';
+            document.getElementById('carbs').value = '';
+            document.getElementById('fats').value = '';
+            document.getElementById('mealName').value = '';
+        } else {
+            alert('Error adding meal: ' + data.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred');
+    }
+}
+
+// Add workout to database
+async function addWorkout() {
+    const workoutType = document.getElementById('workoutType').value;
+    const burned = parseFloat(document.getElementById('burnedCalories').value) || 0;
+
+    if (!workoutType || burned === 0) {
+        alert('Please select workout type and enter calories burned');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/daily/add-workout/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({
+                workout_type: workoutType,
+                calories_burned: burned
+            })
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+            // Reload all data
+            await loadTodayData();
+            
+            // Clear form
+            document.getElementById('workoutType').value = '';
+            document.getElementById('burnedCalories').value = '';
+        } else {
+            alert('Error adding workout: ' + data.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred');
+    }
+}
+
+// Check if nutrition is out of range (R6)
+function checkNutritionRange(netCalories, protein) {
+    let warnings = [];
+    const goal = parseInt(document.getElementById('goalCalories').textContent);
+
+    // Check if over calorie goal by 20%
+    if (netCalories > goal * 1.2) {
+        warnings.push('You have exceeded your daily calorie goal by more than 20%.');
+    }
+
+    // Check if protein is too low
+    if (protein < 50 && netCalories > 1000) {
+        warnings.push('Your protein intake may be too low. Aim for at least 50g per day.');
+    }
+
+    // Show modal if there are warnings
+    if (warnings.length > 0) {
+        document.getElementById('warningMessage').innerHTML = warnings.join('<br><br>');
+        const modal = new bootstrap.Modal(document.getElementById('warningModal'));
+        modal.show();
+    }
+}
+
+// Load data when page loads
+window.addEventListener('load', loadTodayData);
+</script>
+
+{% endblock %}

@@ -1,0 +1,139 @@
+{% extends 'main/base.html' %}
+
+{% block title %}{{ diseases.title }}{% endblock %}
+
+{% block content %}
+<div>
+    <a href="{% url 'disease_page'%}">Back to Disease List</a>
+
+    <h3>{{ diseases.title }}</h3>
+    <div class="disease-description">
+        <strong>Disease Overview:</strong><br>
+        {{ diseases.description }}
+    </div>
+    <div class="row">
+        <div class="col-md-2">
+           <button type="button" 
+                        id="add-btn-{{ disease.id }}"
+                        class="btn btn-primary btn-sm mt-2" 
+                        onclick="addtoUserPickedDisease('{{ diseases.title|escapejs }}')">
+                        Add Disease To Profile
+            </button> 
+        </div>
+        <div class="col-md-2">
+            <a href="{% url 'selected_disease' %}" class="btn btn-success btn-sm mt-2">View Selected Disease</a>
+   
+        </div>
+    </div>
+     
+    <br><br>
+    
+    <div class="row">
+        <div class="col-md-5">
+            <h4>Recommended Foods</h4>
+            <ul>
+                {% for food in diseases.disease_super_food_set.all %}
+                    <li>{{ food.ingredient_id.title }}</li>
+                {% empty %}
+                    <li>No Recommended Foods Available.</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="col-md-5">
+            <h4>Foods To Avoid</h4>
+            <ul>
+                {% for food in diseases.disease_avoid_food_set.all %}
+                    <li>{{ food.ingredient_id.title }}</li>
+                {% empty %}
+                    <li>No Foods to Avoid Listed</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+
+    <h4>Our recommended Nutritional Ranges</h4>
+    <p><strong>Calories:</strong> {{ diseases.low_calories_kcal }} - {{ diseases.high_calories_kcal }} kcal</p>
+    <p><strong>Protein:</strong> {{ diseases.low_protein_g }} - {{ diseases.high_protein_g }} g</p>
+    <p><strong>Carbs:</strong> {{ diseases.low_carbs_g }} - {{ diseases.high_carbs_g }} g</p>
+    <p><strong>Fiber:</strong> {{ diseases.low_fiber_g }} - {{ diseases.high_fiber_g }} g</p>
+    <p><strong>Sugar:</strong> {{ diseases.low_sugar_g }} - {{ diseases.high_sugar_g }} g</p>
+    <p><strong>Sodium:</strong> {{ diseases.low_sodium_mg }} - {{ diseases.high_sodium_mg }} mg</p>
+    <p><strong>Cholesterol:</strong> {{ diseases.low_cholesterol_mg }} - {{ diseases.high_cholesterol_mg }} mg</p>
+    
+    <p><strong>Vitamin A:</strong> {{ diseases.low_vitamin_a_ug }} - {{ diseases.high_vitamin_a_ug }} ug</p>
+    <p><strong>Vitamin B:</strong> {{ diseases.low_vitamin_b_mg }} - {{ diseases.high_vitamin_b_mg }} mg</p>
+    <p><strong>Vitamin C:</strong> {{ diseases.low_vitamin_c_mg }} - {{ diseases.high_vitamin_c_mg }} mg</p>
+    <p><strong>Vitamin D:</strong> {{ diseases.low_vitamin_d_ug }} - {{ diseases.high_vitamin_d_ug }} ug</p>
+    <p><strong>Vitamin E:</strong> {{ diseases.low_vitamin_e_mg }} - {{ diseases.high_vitamin_e_mg }} mg</p>
+    <p><strong>Vitamin K:</strong> {{ diseases.low_vitamin_k_ug }} - {{ diseases.high_vitamin_k_ug }} ug</p>
+    <p><strong>Iron:</strong> {{ diseases.low_iron_mg }} - {{ diseases.high_iron_mg }} mg</p>
+    <p><strong>Calcium:</strong> {{ diseases.low_calcium_mg }} - {{ diseases.high_calcium_mg }} mg</p>
+    <p><strong>Zinc:</strong> {{ diseases.low_zinc_mg }} - {{ diseases.high_zinc_mg }} mg</p>
+    <p><strong>Iodine:</strong> {{ diseases.low_iodine_ug }} - {{ diseases.high_iodine_ug }} ug</p>
+    <p><strong>Selenium:</strong> {{ diseases.low_selenium_ug }} - {{ diseases.high_selenium_ug }} ug</p>
+    <p><strong>Copper:</strong> {{ diseases.low_copper_mg }} - {{ diseases.high_copper_mg }} mg</p>
+    <p><strong>Fluoride:</strong> {{ diseases.low_fluoride_mg }} - {{ diseases.high_fluoride_mg }} mg</p>
+    <p><strong>Chromium:</strong> {{ diseases.low_chromium_mg }} - {{ diseases.high_chromium_mg }} mg</p>
+</div>
+</div>
+
+
+<script>
+        // Helper function to get CSRF token from cookies, took from recipe-list to ensure correct format
+        // Django stores CSRF token in a cookie that we need to read
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // This function is called when user clicks "add" button
+        function addtoUserPickedDisease(diseaseTitle) {
+            const csrftoken = getCookie('csrftoken');
+            //const button = document.getElementById(`add-btn-${diseaseId}`);
+            
+            // Send POST request to Django backend
+            fetch('/add_to_picked_disease/', {
+                method: 'POST',  // POST because we're modifying data
+                headers: {
+                    'Content-Type': 'application/json',  // We're sending JSON
+                    'X-CSRFToken': csrftoken  // Django security token
+                },
+                body: JSON.stringify({ disease_title: diseaseTitle })  // Convert to JSON string
+            })
+            .then(response => response.json())  // Parse response JSON
+            .then(data => {
+
+                // Show user-friendly message based on success/error
+                if (data.success) {
+                    alert('Disease added to user profile!');
+
+                } else if (data.error && data.error.includes("Disease already selected!")){
+                    button.innerText = "Already Added";
+                    button.className = "btn btn-outline-secondary btn-sm w-100 disabled";
+                } else {
+                    alert('Error: ' + data.error);
+                }
+                    
+                
+            })
+            .catch(error => {
+                // Handle network errors
+                console.error('Error:', error);
+                alert('An unexpected error occurred.');
+            });
+        }
+ </script>
+
+{% endblock %}

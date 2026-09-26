@@ -1,0 +1,177 @@
+{% extends 'main/base.html' %}
+{% block extra_css %}
+<style>
+.card-body label{
+    color: #b06a24;
+}
+
+.recipe-count {
+    padding: 10px 5px; 
+    font-weight: 450; 
+}
+.filters {
+    display: flex;
+    justify-content: space-between; /* left & right sides */
+    align-items: center;           /* vertical align */
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.filters-left {
+    display: flex;
+    align-items: center;
+    gap: 10px; 
+    padding: 5px 10px;
+
+}
+
+
+.quick-actions button {
+    margin-left: 5px; 
+}
+
+</style>
+{% endblock %}
+{% block title %}Selected Recipes{% endblock %}
+
+{% block content %}
+<div id="container">
+    <div id="header">
+        <h1> Recipe Collection</h1>
+            <p>Discover delicious and nutritious recipes</p>
+    </div>
+
+
+    <div id="filters" class="mb-4">
+        <input type="text" id="searchInput" placeholder="Search recipes..." onkeyup="filterRecipes()" style="width: 100%; max-width: 600px; padding: 12px; font-size: 18px; border-radius: 8px; border: 1px solid #ccc;">
+        <p id="recipe-count">Showing: {{ recipes|length }} recipes</p>
+    </div>
+
+         <div id="table-container">
+            {% if recipes_with_nutrition %}
+            <div class="row">
+                    {% for recipe, nutrition in recipes_with_nutrition %}
+                    <div class="col-md-4 mb-3 recipe-card">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title recipe-title">{{ recipe.title }}</h5>
+                                
+                                <div class="input-group input-group-sm mb-3">
+                                    <span class="input-group-text">Servings</span>
+                                    <input type="number" id="serv-input-{{ recipe.id }}"
+                                               name="servings" 
+                                               id="serv-input-{{ recipe.id }}"
+                                               value="{{ nutrition.adjusted_serving|default:1 }}"
+                                               class="form-control" min="1"
+                                               oninput="updateNutritionLive('{{ recipe.id }}', '{{ nutrition.calories }}', '{{ nutrition.protein }}', '{{ nutrition.carbs }}','{{ nutrition.fats }}', '{{ nutrition.fiber }}')">
+                                               
+                                </div>
+                               
+                                <p class="card-text">
+                                    <label>Meal Type:</label> {{ recipe.meal_type|default:"Snack" }}<br>
+                                    <label>Calories:</label> <span id="cal-{{ recipe.id }}">{{ nutrition.calories }}</span> kcal<br>
+                                    <label>Protein:</label> <span id="prot-{{ recipe.id }}">{{ nutrition.protein }}</span> g <br>
+                                    <label>Carbs:</label> <span id="carb-{{ recipe.id }}">{{ nutrition.carbs }}</span> g<br>
+                                    <label>Fiber:</label> <span id="fiber-{{ recipe.id }}">{{ nutrition.fiber }}</span> g<br>
+                                    <label>Fats:</label> <span id="fats-{{ recipe.id }}">{{ nutrition.fats }}</span> g<br>
+
+                                </p>
+                                <button class="btn btn-success mt-auto w-100"
+                                        onclick="addtoUserPickedRecipes('{{ recipe.title|escapejs }}', '{{ recipe.id }}')"> Add
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div id="no-results">
+                    <h2>No Recipes Found</h2>
+                    <p>Try creating your own</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+<script> 
+    // Helper function to get CSRF token from cookies
+    // Django stores CSRF token in a cookie that we need to read
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    function updateNutritionLive(recipeId, baseCal, baseProt, baseCarbs, baseFats, baseFiber) {
+        const input = document.getElementById('serv-input-' + recipeId);
+        const servings = parseFloat(input.value) || 1;
+
+        // Use parseFloat to ensure we aren't doing math on strings
+        document.getElementById('cal-' + recipeId).innerText = (parseFloat(baseCal) * servings).toFixed(1);
+        document.getElementById('prot-' + recipeId).innerText = (parseFloat(baseProt) * servings).toFixed(1);
+        document.getElementById('carb-' + recipeId).innerText = (parseFloat(baseCarbs) * servings).toFixed(1);
+        document.getElementById('fiber-' + recipeId).innerText = (parseFloat(baseFiber) * servings).toFixed(1);
+        document.getElementById('fats-' + recipeId).innerText = (parseFloat(baseFats) * servings).toFixed(1);
+    }
+    // This function is called when user clicks "add" button
+    function addtoUserPickedRecipes(recipeTitle, recipeId) {
+        const csrftoken = getCookie('csrftoken');
+        const servingsInput = document.getElementById('serv-input-' + recipeId);
+        const adjustedServings = servingsInput ? servingsInput.value : 1;
+        
+        // Send POST request to Django backend
+        fetch('/add_to_picked_recipes/', {
+            method: 'POST',  // POST because we're modifying data
+            headers: {
+                'Content-Type': 'application/json',  // We're sending JSON
+                'X-CSRFToken': csrftoken  // Django security token
+            },
+            body: JSON.stringify({ recipe_title: recipeTitle, servings: adjustedServings})  // Convert to JSON string
+        })
+        .then(response => response.json())  // Parse response JSON
+        .then(data => {
+            // Show user-friendly message based on success/error
+            if (data.success) {
+                alert('Recipe added to your picked recipes!');
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            // Handle network errors
+            console.error('Error:', error);
+            alert('An unexpected error occurred.');
+        });
+    }
+
+    function filterRecipes() {
+        const searchInput = document.getElementById('searchInput').value.toLowerCase();
+        const cards = document.getElementsByClassName('recipe-card');
+        let visibleCount = 0;
+
+        for (let i = 0; i < cards.length; i++) {
+            const card = cards[i];
+            const title = card.querySelector('.recipe-title').textContent.toLowerCase();
+            if(title.includes(searchInput)){
+                card.style.display = "";
+                visibleCount ++;
+            }else{
+                card.style.display = "none";
+            }
+        }
+        const countD = document.getElementById('recipe-count');
+
+        if(countD){
+            countD.textContent = "Showing: " + visibleCount + " recipes";
+        }
+    }
+</script>
+{% endblock %}

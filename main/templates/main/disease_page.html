@@ -1,0 +1,133 @@
+{% extends 'main/base.html' %}
+{% load static %}
+{% block title %}Diseases{% endblock %}
+
+{% block content %}
+<div id="container">
+    <h1>Diseases</h1>
+
+    <div id="filters">
+        <input type="text" id="searchInput" placeholder="Search diseases..." onkeyup="filterDiseases()" style="width: 100%; max-width: 600px; padding: 12px; font-size: 18px; border-radius: 8px; border: 1px solid #ccc;">
+        <p id="disease-count">Showing: {{ diseases|length }} diseases</p>
+    </div>
+   
+    <div id="disease-container">
+        {% for disease in diseases %}
+        <div class="disease-container mb-4">
+            <div class="row align-items-center">
+                <div class="col-8 col-md-9">
+
+                
+                    <a href="{% url 'disease_detail' disease.id %}" class="text-dark text-decoration-none">
+                        <h3 class="disease-title">{{ disease.title }}</h3>
+                
+                    </a>
+                </div>
+                <div class="col-4 col-md-3 text-end">
+                    <button type="button" 
+                        id="add-btn-{{ disease.id }}"
+                        class="btn btn-primary btn-sm mt-2" 
+                        onclick="addtoUserPickedDisease('{{ disease.title|escapejs }}')">
+                        Quick Add +
+                    </button>
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col-12">
+                    <p class="disease-description">{{ disease.description }}</p> 
+                
+                    <p class="disease-related small text-muted">
+                        <strong>Related Diseases:</strong> {{ disease.related_diseases }}
+                    </p>
+                    
+                    <hr class="card-divider">
+                </div>
+            </div>
+        </div>
+        {% empty %}
+            <p>No diseases found.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+function filterDiseases() {
+    const searchInput = document.getElementById('searchInput').value.toLowerCase();
+    const cards = document.getElementsByClassName('disease-card');
+    let visibleCount = 0;
+
+    for (let i = 0; i < cards.length; i++) {
+        const card = cards[i];
+        const title = card.querySelector('.disease-title').textContent.toLowerCase();
+        
+
+        if (title.includes(searchInput)){
+            card.style.display =  "";
+            visibleCount++;
+        }else{
+        card.style.display = "none";
+        }
+    }
+    const countDisplay = document.getElementById('disease-count');
+    if(countDisplay) {
+        countDisplay.textContent = `Showing: ${visibleCount} diseases`;
+    }
+    
+}
+</script>
+<script>
+        // Helper function to get CSRF token from cookies, took from recipe-list to ensure correct format
+        // Django stores CSRF token in a cookie that we need to read
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // This function is called when user clicks "add" button
+        function addtoUserPickedDisease(diseaseTitle) {
+            const csrftoken = getCookie('csrftoken');
+            //const button = document.getElementById(`add-btn-${diseaseId}`);
+            
+            // Send POST request to Django backend
+            fetch('/add_to_picked_disease/', {
+                method: 'POST',  // POST because we're modifying data
+                headers: {
+                    'Content-Type': 'application/json',  // We're sending JSON
+                    'X-CSRFToken': csrftoken  // Django security token
+                },
+                body: JSON.stringify({ disease_title: diseaseTitle })  // Convert to JSON string
+            })
+            .then(response => response.json())  // Parse response JSON
+            .then(data => {
+
+                // Show user-friendly message based on success/error
+                if (data.success) {
+                    alert('Disease added to user profile!');
+
+                } else if (data.error && data.error.includes("Disease already selected!")){
+                    button.innerText = "Already Added";
+                    button.className = "btn btn-outline-secondary btn-sm w-100 disabled";
+                } else {
+                    alert('Error: ' + data.error);
+                }
+                    
+                
+            })
+            .catch(error => {
+                // Handle network errors
+                console.error('Error:', error);
+                alert('An unexpected error occurred.');
+            });
+        }
+ </script>
+{% endblock %}
